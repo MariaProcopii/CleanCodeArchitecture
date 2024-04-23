@@ -7,16 +7,17 @@ public record BookRide(Guid RideId, Guid PassengerId) : IRequest<Guid>;
 
 public class BookRideHandler : IRequestHandler<BookRide, Guid>
 {
-    private readonly IRideRepository _rideRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public BookRideHandler(IRideRepository rideRepository)
+    public BookRideHandler(IUnitOfWork unitOfWork)
     {
-        _rideRepository = rideRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<Guid> Handle(BookRide request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(BookRide request, CancellationToken cancellationToken)
     {
-        var bookedRideId = _rideRepository.BookRide(request.RideId, request.PassengerId);
-        return Task.FromResult(bookedRideId);
+        var bookedRideId = await _unitOfWork.RideRepository.BookRide(request.RideId, request.PassengerId);
+        await _unitOfWork.Save();
+        return bookedRideId;
     }
 }

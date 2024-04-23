@@ -7,25 +7,17 @@ public record DeletePassenger(Guid PassengerId) : IRequest<Guid>;
 
 public class DeletePassengerHandler : IRequestHandler<DeletePassenger, Guid>
 {
-    private readonly IPassengerRepository _passengerRepository;
-    private readonly IRideRepository _rideRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeletePassengerHandler(IPassengerRepository passengerRepository, IRideRepository rideRepository)
+    public DeletePassengerHandler(IUnitOfWork unitOfWork)
     {
-        _passengerRepository = passengerRepository;
-        _rideRepository = rideRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<Guid> Handle(DeletePassenger request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(DeletePassenger request, CancellationToken cancellationToken)
     {
-        var passengerToDelete = _passengerRepository.GetById(request.PassengerId);
-        var bookedRideIds = passengerToDelete.BookRides.Select(ride => ride.Id).ToList();
-        foreach (var rideId in bookedRideIds)
-        {
-            _rideRepository.RemovePassengerFromRide(rideId, request.PassengerId);
-        }
-
-        var deletedPassengerId = _passengerRepository.Delete(request.PassengerId);
-        return Task.FromResult(deletedPassengerId);
+        await _unitOfWork.PassengerRepository.Delete(request.PassengerId);
+        await _unitOfWork.Save();
+        return request.PassengerId;
     }
 }

@@ -8,16 +8,16 @@ public record GetAllPassengers() : IRequest<List<PassengerDTO>>;
 
 public class GetAllPassengersHandler : IRequestHandler<GetAllPassengers, List<PassengerDTO>>
 {
-    private readonly IPassengerRepository _passengerRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetAllPassengersHandler(IPassengerRepository passengerRepository)
+    public GetAllPassengersHandler(IUnitOfWork unitOfWork)
     {
-        _passengerRepository = passengerRepository;
+        _unitOfWork = unitOfWork;
     }
-
-    public Task<List<PassengerDTO>> Handle(GetAllPassengers request, CancellationToken cancellationToken)
+    
+    public async Task<List<PassengerDTO>> Handle(GetAllPassengers request, CancellationToken cancellationToken)
     {
-        var passengers = _passengerRepository.GetAll();
-        return Task.FromResult(passengers.Select(PassengerDTO.fromPassenger).ToList());
+        var passengers = await _unitOfWork.PassengerRepository.GetAll();
+        return passengers.Select(PassengerDTO.FromPassenger).ToList();
     }
 }

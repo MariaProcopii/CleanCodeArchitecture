@@ -11,8 +11,6 @@ public class RideDTO
     public string DestinationFrom { get; set; }
     public string DestinationTo { get; set; }
     public int AvailableSeats { get; set; }
-    public DriverDTO Owner { get; set; }
-
     public static RideDTO FromRide(Ride ride)
     {
         return new RideDTO
@@ -22,7 +20,6 @@ public class RideDTO
             DestinationFrom = ride.DestinationFrom,
             DestinationTo = ride.DestinationTo,
             AvailableSeats = ride.AvailableSeats,
-            Owner = DriverDTO.FromDriver(ride.Owner)
         };
     }
     
@@ -30,7 +27,6 @@ public class RideDTO
     {
         return $"====Ride Details====\n" +
                $"Destination: {DestinationFrom} to {DestinationTo}\n" +
-               $"Available Seats: {AvailableSeats}\n" +
-               $"Owner: {Owner.Name}\n";
+               $"Available Seats: {AvailableSeats}\n";
     }
 }

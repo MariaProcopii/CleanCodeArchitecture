@@ -8,11 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CarBoookingApp.Domain\CarBoookingApp.Domain.csproj" />
+      <ProjectReference Include="..\CarBookingApp.Domain\CarBookingApp.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="MediatR" Version="12.2.0" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
     </ItemGroup>
 
 </Project>

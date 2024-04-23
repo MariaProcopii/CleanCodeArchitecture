@@ -5,29 +5,28 @@ using MediatR;
 
 namespace CarBookingApp.Application.Drivers.Commands;
 
-public record CreateDriver(string Name, string Email, string CarModel, string LicenseNumber) : IRequest<DriverDTO>;
+public record CreateDriver(string Name, string Email, string LicenseNumber) : IRequest<DriverDTO>;
 
 public class CreateDriverHandler : IRequestHandler<CreateDriver, DriverDTO>
 {
-    private readonly IDriverRepository _driverRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateDriverHandler(IDriverRepository driverRepository)
+    public CreateDriverHandler(IUnitOfWork unitOfWork)
     {
-        _driverRepository = driverRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<DriverDTO> Handle(CreateDriver request, CancellationToken cancellationToken)
+    public async Task<DriverDTO> Handle(CreateDriver request, CancellationToken cancellationToken)
     {
         var driver = new Driver
         {
-            Id = Guid.NewGuid(),
             Name = request.Name,
             Email = request.Email,
-            CarModel = request.CarModel,
             LicenseNumber = request.LicenseNumber
         };
-        var createdDriver = _driverRepository.Create(driver);
+        await _unitOfWork.DriverRepository.Create(driver);
+        await _unitOfWork.Save();
 
-        return Task.FromResult(DriverDTO.FromDriver(createdDriver));
+        return DriverDTO.FromDriver(driver);
     }
 }

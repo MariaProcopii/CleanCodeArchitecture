@@ -1,24 +1,35 @@
 using CarBookingApp.Application.Abstractions;
+using CarBookingApp.Application.Drivers.Responses;
 using CarBookingApp.Application.Rides.Responses;
 using CarBoookingApp.Domain.Model;
 using MediatR;
 
 namespace CarBookingApp.Application.Rides.Commands;
 
-public record UpdateRide(Guid RideId, Ride UpdatedRide) : IRequest<RideDTO>;
+public record UpdateRide(Guid RideId, RideDTO UpdatedRide) : IRequest<RideDTO>;
 
 public class UpdateRideHandler : IRequestHandler<UpdateRide, RideDTO>
 {
-    private readonly IRideRepository _rideRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateRideHandler(IRideRepository rideRepository)
+    public UpdateRideHandler(IUnitOfWork unitOfWork)
     {
-        _rideRepository = rideRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<RideDTO> Handle(UpdateRide request, CancellationToken cancellationToken)
+    public async Task<RideDTO> Handle(UpdateRide request, CancellationToken cancellationToken)
     {
-        var newRide = _rideRepository.Update(request.RideId, request.UpdatedRide);
-        return Task.FromResult(RideDTO.FromRide(newRide));
+        var ride = await _unitOfWork.RideRepository.GetById(request.RideId);
+        if (ride != null)
+        {
+            ride.DateOfTheRide = request.UpdatedRide.DateOfTheRide;
+            ride.AvailableSeats = request.UpdatedRide.AvailableSeats;
+            ride.DestinationFrom = request.UpdatedRide.DestinationFrom;
+            ride.DestinationTo = request.UpdatedRide.DestinationFrom;
+        }
+
+        var newRide = await _unitOfWork.RideRepository.Update(ride);
+        await _unitOfWork.Save();
+        return RideDTO.FromRide(newRide);
     }
 }

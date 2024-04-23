@@ -4,9 +4,9 @@ namespace CarBookingApp.Application.Abstractions;
 
 public interface IDriverRepository
 {
-    Driver? GetById(Guid id);
-    List<Driver> GetAll();
-    Driver Create(Driver driver);
-    Driver Update(Guid id, Driver driver);
-    Guid Delete(Guid id);
+    Task<Driver?> GetById(Guid id);
+    Task<List<Driver>> GetAll();
+    Task<Driver> Create(Driver driver);
+    Task<Driver> Update(Driver driver);
+    Task<Guid> Delete(Guid id);
 }

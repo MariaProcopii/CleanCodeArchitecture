@@ -10,28 +10,26 @@ public record CreateRide(Guid OwnerId, string DestinationFrom, string Destinatio
 
 public class CreateRideHandler : IRequestHandler<CreateRide, RideDTO>
 {
-    private readonly IRideRepository _rideRepository;
-    private readonly IDriverRepository _driverRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateRideHandler(IRideRepository rideRepository, IDriverRepository driverRepository)
+    public CreateRideHandler(IUnitOfWork unitOfWork)
     {
-        _rideRepository = rideRepository;
-        _driverRepository = driverRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<RideDTO> Handle(CreateRide request, CancellationToken cancellationToken)
+    public async Task<RideDTO> Handle(CreateRide request, CancellationToken cancellationToken)
     {
-        var owner = _driverRepository.GetById(request.OwnerId);
+        var owner = await _unitOfWork.DriverRepository.GetById(request.OwnerId);
         var ride = new Ride
         {
-            Id = Guid.NewGuid(),
             DateOfTheRide = request.DateOfTheRide,
             DestinationFrom = request.DestinationFrom,
             DestinationTo = request.DestinationTo,
             AvailableSeats = request.AvailableSeats,
             Owner = owner
         };
-        var createdRide = _rideRepository.Create(ride);
-        return Task.FromResult(RideDTO.FromRide(createdRide));
+        var createdRide = await _unitOfWork.RideRepository.Create(ride);
+        await _unitOfWork.Save();
+        return RideDTO.FromRide(createdRide);
     }
 }

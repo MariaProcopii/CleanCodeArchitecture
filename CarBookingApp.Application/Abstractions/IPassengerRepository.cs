@@ -4,9 +4,9 @@ namespace CarBookingApp.Application.Abstractions;
 
 public interface IPassengerRepository
 {
-    Passenger? GetById(Guid id);
-    List<Passenger> GetAll();
-    Passenger Create(Passenger passenger);
-    Passenger Update(Guid id, Passenger passenger);
-    Guid Delete(Guid id);
+    Task<Passenger?> GetById(Guid id);
+    Task<List<Passenger>> GetAll();
+    Task<Passenger> Create(Passenger passenger);
+    Task<Passenger> Update(Passenger passenger);
+    Task<Guid> Delete(Guid id);
 }

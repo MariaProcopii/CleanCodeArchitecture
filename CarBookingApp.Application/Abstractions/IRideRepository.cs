@@ -4,12 +4,12 @@ namespace CarBookingApp.Application.Abstractions;
 
 public interface IRideRepository
 {
-    Ride? GetById(Guid id);
-    List<Ride> GetAll();
-    Ride Create(Ride ride);
-    Ride Update(Guid id, Ride ride);
-    Guid BookRide(Guid rideId, Guid passengerId);
-    Guid RemovePassengerFromRide(Guid rideId, Guid passengerId);
-    Guid Delete(Guid id);
+    Task<Ride?> GetById(Guid id);
+    Task<List<Ride>> GetAll();
+    Task<Ride> Create(Ride ride);
+    Task<Ride> Update(Ride ride);
+    Task<Guid> BookRide(Guid rideId, Guid passengerId);
+    Task<Guid> RemovePassengerFromRide(Guid rideId, Guid passengerId);
+    Task<Guid> Delete(Guid id);
     
 }

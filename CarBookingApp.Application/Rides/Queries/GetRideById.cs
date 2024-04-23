@@ -8,16 +8,16 @@ public record GetRideById(Guid RideId) : IRequest<RideDTO>;
 
 public class GetRideByIdHandler : IRequestHandler<GetRideById, RideDTO>
 {
-    private readonly IRideRepository _rideRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetRideByIdHandler(IRideRepository rideRepository)
+    public GetRideByIdHandler(IUnitOfWork unitOfWork)
     {
-        _rideRepository = rideRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<RideDTO> Handle(GetRideById request, CancellationToken cancellationToken)
+    public async Task<RideDTO> Handle(GetRideById request, CancellationToken cancellationToken)
     {
-        var ride = _rideRepository.GetById(request.RideId);
-        return Task.FromResult(RideDTO.FromRide(ride));
+        var ride = await _unitOfWork.RideRepository.GetById(request.RideId);
+        return RideDTO.FromRide(ride);
     }
 }

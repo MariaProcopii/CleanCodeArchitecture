@@ -8,16 +8,16 @@ public record GetAllDrivers() : IRequest<List<DriverDTO>>;
 
 public class GetAllDriversHandler : IRequestHandler<GetAllDrivers, List<DriverDTO>>
 {
-    private readonly IDriverRepository _driverRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public GetAllDriversHandler(IDriverRepository driverRepository)
+    public GetAllDriversHandler(IUnitOfWork unitOfWork)
     {
-        _driverRepository = driverRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<List<DriverDTO>> Handle(GetAllDrivers request, CancellationToken cancellationToken)
+    public async Task<List<DriverDTO>> Handle(GetAllDrivers request, CancellationToken cancellationToken)
     {
-        var drivers = _driverRepository.GetAll();
-        return Task.FromResult(drivers.Select(DriverDTO.FromDriver).ToList());
+        var drivers = await _unitOfWork.DriverRepository.GetAll();
+        return drivers.Select(DriverDTO.FromDriver).ToList();
     }
 }

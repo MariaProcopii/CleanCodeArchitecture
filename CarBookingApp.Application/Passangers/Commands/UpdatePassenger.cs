@@ -5,20 +5,28 @@ using MediatR;
 
 namespace CarBookingApp.Application.Passangers.Commands;
 
-public record UpdatePassenger(Guid PassengerId, Passenger UpdatedPassenger) : IRequest<PassengerDTO>;
+public record UpdatePassenger(PassengerDTO UpdatedPassenger) : IRequest<PassengerDTO>;
 
 public class UpdatePassengerHandler : IRequestHandler<UpdatePassenger, PassengerDTO>
 {
-    private readonly IPassengerRepository _passengerRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdatePassengerHandler(IPassengerRepository passengerRepository)
+    public UpdatePassengerHandler(IUnitOfWork unitOfWork)
     {
-        _passengerRepository = passengerRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<PassengerDTO> Handle(UpdatePassenger request, CancellationToken cancellationToken)
+    public async Task<PassengerDTO> Handle(UpdatePassenger request, CancellationToken cancellationToken)
     {
-        var newPassenger = _passengerRepository.Update(request.PassengerId, request.UpdatedPassenger);
-        return Task.FromResult(PassengerDTO.fromPassenger(newPassenger));
+        var passenger = _unitOfWork.PassengerRepository.GetById(request.UpdatedPassenger.Id).Result;
+        if (passenger != null)
+        {
+            passenger.Email = request.UpdatedPassenger.Email;
+            passenger.Name = request.UpdatedPassenger.Name;
+        }
+
+        await _unitOfWork.PassengerRepository.Update(passenger);
+        await _unitOfWork.Save();
+        return request.UpdatedPassenger;
     }
 }

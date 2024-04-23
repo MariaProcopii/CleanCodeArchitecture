@@ -9,24 +9,30 @@ public record CreatePassenger(string Name, string Email, string PaymentMethod): 
 
 public class CreatePassengerHandler : IRequestHandler<CreatePassenger, PassengerDTO>
 {
-    private readonly IPassengerRepository _passengerRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreatePassengerHandler(IPassengerRepository passengerRepository)
+    public CreatePassengerHandler(IUnitOfWork unitOfWork)
     {
-        _passengerRepository = passengerRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<PassengerDTO> Handle(CreatePassenger request, CancellationToken cancellationToken)
+    public async Task<PassengerDTO> Handle(CreatePassenger request, CancellationToken cancellationToken)
     {
+        
+        var paymentMethod = new PaymentMethod
+        {
+            PaymentMethodName = request.PaymentMethod
+        };
         var passenger = new Passenger
         {
-            Id = Guid.NewGuid(),
             Name = request.Name,
-            Email = request.Email,
-            PaymentMethod = request.PaymentMethod
+            Email = request.Email
         };
-        var createdPassenger = _passengerRepository.Create(passenger);
-        
-        return Task.FromResult(PassengerDTO.fromPassenger(createdPassenger));
+        passenger.PaymentMethods.Add(paymentMethod);
+
+        await _unitOfWork.PassengerRepository.Create(passenger);
+        await _unitOfWork.Save();
+
+        return PassengerDTO.FromPassenger(passenger);
     }
 }

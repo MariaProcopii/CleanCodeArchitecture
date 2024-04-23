@@ -7,25 +7,17 @@ public record DeleteDriver(Guid DriverId) : IRequest<Guid>;
 
 public class DeleteDriverHandler : IRequestHandler<DeleteDriver, Guid>
 {
-    private readonly IDriverRepository _driverRepository;
-    private readonly IRideRepository _rideRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteDriverHandler(IDriverRepository driverRepository, IRideRepository rideRepository)
+    public DeleteDriverHandler(IUnitOfWork unitOfWork)
     {
-        _driverRepository = driverRepository;
-        _rideRepository = rideRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<Guid> Handle(DeleteDriver request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(DeleteDriver request, CancellationToken cancellationToken)
     {
-        var driver = _driverRepository.GetById(request.DriverId);
-        var driverRideIds = driver.CreatedRides.Select(ride => ride.Id).ToList();
-        foreach (var rideId in driverRideIds)
-        {
-            _rideRepository.Delete(rideId);
-        }
-
-        var deletedDriverId = _driverRepository.Delete(request.DriverId);
-        return Task.FromResult(deletedDriverId);
+        await _unitOfWork.DriverRepository.Delete(request.DriverId);
+        await _unitOfWork.Save();
+        return request.DriverId;
     }
 }

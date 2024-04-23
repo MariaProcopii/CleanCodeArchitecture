@@ -5,20 +5,29 @@ using MediatR;
 
 namespace CarBookingApp.Application.Drivers.Commands;
 
-public record UpdateDriver(Guid driverId, Driver UpdatedDriver) : IRequest<DriverDTO>;
+public record UpdateDriver(DriverDTO UpdatedDriver) : IRequest<DriverDTO>;
 
 public class UpdateDriverHandler : IRequestHandler<UpdateDriver, DriverDTO>
 {
-    private readonly IDriverRepository _driverRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateDriverHandler(IDriverRepository driverRepository)
+    public UpdateDriverHandler(IUnitOfWork unitOfWork)
     {
-        _driverRepository = driverRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<DriverDTO> Handle(UpdateDriver request, CancellationToken cancellationToken)
+    public async Task<DriverDTO> Handle(UpdateDriver request, CancellationToken cancellationToken)
     {
-        var newDriver = _driverRepository.Update(request.driverId, request.UpdatedDriver);
-        return Task.FromResult(DriverDTO.FromDriver(newDriver));
+        var driver = await _unitOfWork.DriverRepository.GetById(request.UpdatedDriver.Id);
+        if (driver != null)
+        {
+            driver.Email = request.UpdatedDriver.Email;
+            driver.Name = request.UpdatedDriver.Name;
+            driver.LicenseNumber = request.UpdatedDriver.LicenseNumber;
+        }
+
+        await _unitOfWork.DriverRepository.Update(driver);
+        await _unitOfWork.Save();
+        return request.UpdatedDriver;
     }
 }

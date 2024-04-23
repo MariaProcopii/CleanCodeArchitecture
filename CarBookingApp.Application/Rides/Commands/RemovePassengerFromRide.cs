@@ -1,5 +1,4 @@
 using CarBookingApp.Application.Abstractions;
-using CarBoookingApp.Domain.Model;
 using MediatR;
 
 namespace CarBookingApp.Application.Rides.Commands;
@@ -8,16 +7,18 @@ public record RemovePassengerFromRide(Guid RideId, Guid PassengerId) : IRequest<
 
 public class RemovePassengerFromRideHandler : IRequestHandler<RemovePassengerFromRide, Guid>
 {
-    private readonly IRideRepository _rideRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public RemovePassengerFromRideHandler(IRideRepository rideRepository)
+    public RemovePassengerFromRideHandler(IUnitOfWork unitOfWork)
     {
-        _rideRepository = rideRepository;
+        _unitOfWork = unitOfWork;
     }
 
-    public Task<Guid> Handle(RemovePassengerFromRide request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(RemovePassengerFromRide request, CancellationToken cancellationToken)
     {
-        var removerdPassengerId = _rideRepository.RemovePassengerFromRide(request.RideId, request.PassengerId);
-        return Task.FromResult(removerdPassengerId);
+        var removedPassengerId = await _unitOfWork.RideRepository
+            .RemovePassengerFromRide(request.RideId, request.PassengerId);
+        await _unitOfWork.Save();
+        return removedPassengerId;
     }
 }
