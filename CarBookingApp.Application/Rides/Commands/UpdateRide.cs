@@ -6,7 +6,7 @@ using MediatR;
 
 namespace CarBookingApp.Application.Rides.Commands;
 
-public record UpdateRide(Guid RideId, RideDTO UpdatedRide) : IRequest<RideDTO>;
+public record UpdateRide(RideDTO UpdatedRide) : IRequest<RideDTO>;
 
 public class UpdateRideHandler : IRequestHandler<UpdateRide, RideDTO>
 {
@@ -19,13 +19,13 @@ public class UpdateRideHandler : IRequestHandler<UpdateRide, RideDTO>
 
     public async Task<RideDTO> Handle(UpdateRide request, CancellationToken cancellationToken)
     {
-        var ride = await _unitOfWork.RideRepository.GetById(request.RideId);
+        var ride = await _unitOfWork.RideRepository.GetById(request.UpdatedRide.Id);
         if (ride != null)
         {
             ride.DateOfTheRide = request.UpdatedRide.DateOfTheRide;
             ride.AvailableSeats = request.UpdatedRide.AvailableSeats;
             ride.DestinationFrom = request.UpdatedRide.DestinationFrom;
-            ride.DestinationTo = request.UpdatedRide.DestinationFrom;
+            ride.DestinationTo = request.UpdatedRide.DestinationTo;
         }
 
         var newRide = await _unitOfWork.RideRepository.Update(ride);

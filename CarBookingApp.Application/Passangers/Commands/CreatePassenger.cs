@@ -5,7 +5,7 @@ using MediatR;
 
 namespace CarBookingApp.Application.Passangers.Commands;
 
-public record CreatePassenger(string Name, string Email, string PaymentMethod): IRequest<PassengerDTO>;
+public record CreatePassenger(string Name, string Email): IRequest<PassengerDTO>;
 
 public class CreatePassengerHandler : IRequestHandler<CreatePassenger, PassengerDTO>
 {
@@ -18,18 +18,12 @@ public class CreatePassengerHandler : IRequestHandler<CreatePassenger, Passenger
 
     public async Task<PassengerDTO> Handle(CreatePassenger request, CancellationToken cancellationToken)
     {
-        
-        var paymentMethod = new PaymentMethod
-        {
-            PaymentMethodName = request.PaymentMethod
-        };
         var passenger = new Passenger
         {
             Name = request.Name,
             Email = request.Email
         };
-        passenger.PaymentMethods.Add(paymentMethod);
-
+        
         await _unitOfWork.PassengerRepository.Create(passenger);
         await _unitOfWork.Save();
 
