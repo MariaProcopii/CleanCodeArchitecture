@@ -1,19 +1,12 @@
-using CarBookingApp.Application.Abstractions;
-using CarBookingApp.Infrastructure;
 using CarBookingApp.Infrastructure.Configurations;
-using CarBookingApp.Infrastructure.Repositories;
+using CarBookingApp.PresentationWeb.Middlewares.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services
-    .AddSingleton<CarBookingAppDbContext>()
-    .AddSingleton<IDriverRepository, DriverRepository>()
-    .AddSingleton<IPassengerRepository, PassengerRepository>()
-    .AddSingleton<IRideRepository, RideRepository>()
-    .AddSingleton<IUnitOfWork, UnitOfWork>()
-    .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(IRideRepository).Assembly));
+builder.Services.AddDbContext<CarBookingAppDbContext>(cfg =>
+    cfg.UseNpgsql(builder.Configuration.GetConnectionString("DefaultDB")));
+builder.Services.AddServices();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +20,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseTimingLogging();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
