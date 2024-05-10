@@ -19,7 +19,7 @@ public class UpdateDriverHandler : IRequestHandler<UpdateDriver, DriverDTO>
     public async Task<DriverDTO> Handle(UpdateDriver request, CancellationToken cancellationToken)
     {
         var driver = await _unitOfWork.DriverRepository.GetById(request.UpdatedDriver.Id);
-        if (driver != null)
+        if (driver != null)                                                 
         {
             driver.Email = request.UpdatedDriver.Email;
             driver.Name = request.UpdatedDriver.Name;

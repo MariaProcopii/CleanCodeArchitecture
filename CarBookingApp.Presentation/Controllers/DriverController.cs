@@ -36,7 +36,7 @@ public class DriverController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<DriverDTO> CreateDriver([FromBody] DriverDTO driver)
+    public async Task<DriverDTO> CreateUser([FromBody] DriverDTO driver)
     {
         var result = await _mediator.Send(new CreateDriver(Name: driver.Name, Email: driver.Email, 
             LicenseNumber: driver.LicenseNumber));
